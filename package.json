@@ -1,0 +1,23 @@
+{
+  "name": "voodoo-client",
+  "version": "0.0.1",
+  "description": "Think of it as a voodoo doll with a hair from the voodoo-server",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha test",
+    "test:watch": "node_modules/mocha/bin/mocha test --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.15.3",
+    "engine.io-client": "^2.0.1",
+    "objectstreamer": "^1.0.0",
+    "queue": "github:johan-olsson/Queue",
+    "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "nock": "^9.0.2"
+  }
+}
