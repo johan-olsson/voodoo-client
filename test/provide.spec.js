@@ -4,7 +4,7 @@ const nock = require('nock')
 const assert = require('assert')
 const Client = require('../')
 
-var scope = nock('http://localhost:8080')
+var scope = nock('http://localhost:5353')
   .post('/login')
   .reply(200, {
     token: 'token'
@@ -21,7 +21,7 @@ describe('provide', () => {
   it('should handle out- and in-streams', (done) => {
 
     client.provide('rpc-name', (req, res) => {
-      assert.equal(req, 'payload-data')
+      assert.equal(req.data, 'payload-data')
       res.send('response-payload-data')
     })
 

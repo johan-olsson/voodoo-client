@@ -1,9 +1,12 @@
 'use strict'
 
+const validator = require('argument-validator')
 const Objectstreamer = require('objectstreamer')
 const uuid = require('uuid').v4
 
 module.exports = function (name, handler) {
+  validator.string(name, 'name')
+  validator.function(handler, 'handler')
 
   this._queue.push((next) => {
 

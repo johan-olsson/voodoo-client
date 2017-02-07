@@ -4,20 +4,25 @@
   "description": "Think of it as a voodoo doll with a hair from the voodoo-server",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha test",
-    "test:watch": "node_modules/mocha/bin/mocha test --watch"
+    "test": "mocha test",
+    "test:watch": "mocha --watch test",
+    "coverage": "nyc --reporter=html --reporter=text npm test; echo coverage/index.html"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "argument-validator": "^0.1.0",
     "axios": "^0.15.3",
     "engine.io-client": "^2.0.1",
+    "jsonwebtoken": "^7.2.1",
+    "net-retry-connect": "^0.1.1",
     "objectstreamer": "^1.0.0",
-    "queue": "github:johan-olsson/Queue",
+    "ssfq": "^0.0.1",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
     "mocha": "^3.2.0",
-    "nock": "^9.0.2"
+    "nock": "^9.0.2",
+    "nyc": "^10.1.2"
   }
 }

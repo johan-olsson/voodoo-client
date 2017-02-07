@@ -1,2 +1,5 @@
 node_modules
+coverage
 test.js
+npm-debug
+.nyc_output

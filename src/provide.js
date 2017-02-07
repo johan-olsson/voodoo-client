@@ -1,15 +1,18 @@
 'use strict'
 
+const validator = require('argument-validator')
 const Objectstreamer = require('objectstreamer')
 const uuid = require('uuid').v4
 
 module.exports = function (name, handler) {
+  validator.string(name, 'name')
+  validator.function(handler, 'handler')
 
   const id = uuid()
 
   this._queue.push((next) => {
 
-    const dispose = this.refinedstream.filter((data) => {
+    this.refinedstream.filter((data) => {
         return data.type === 'rpc' &&
           data.action === 'make' &&
           data.name === name
@@ -34,15 +37,17 @@ module.exports = function (name, handler) {
                 payload: message,
                 action: 'end'
               }))
-
-            dispose()
           }
         }
 
-        handler({
-          user: data.user,
-          data: data.payload
-        }, res)
+        Promise.resolve()
+          .then(() => {
+            handler({
+              user: data.user,
+              data: data.payload
+            }, res)
+          })
+          .catch(res.error)
       })
 
     this.outstream.write({

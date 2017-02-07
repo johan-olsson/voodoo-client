@@ -1,9 +1,13 @@
 'use strict'
 
+const validator = require('argument-validator')
 const Objectstreamer = require('objectstreamer')
 const uuid = require('uuid').v4
 
 module.exports = function (name, payload, handler) {
+  validator.string(name, 'name')
+  validator.isType('undefined', payload)
+  validator.function(handler, 'handler')
 
   const id = uuid()
 

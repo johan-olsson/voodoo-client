@@ -4,7 +4,7 @@ const nock = require('nock')
 const assert = require('assert')
 const Client = require('../')
 
-var scope = nock('http://localhost:8080')
+var scope = nock('http://localhost:5353')
   .post('/login')
   .reply(200, {
     token: 'token'

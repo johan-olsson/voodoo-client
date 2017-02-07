@@ -5,10 +5,10 @@ const nock = require('nock')
 
 const Client = require('../')
 
-var scope = nock('http://localhost:8080')
+var scope = nock('http://localhost:5353')
   .post('/login')
   .reply(200, {
-    token: 'token'
+    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwibmFtZSI6IkpvaGFuIE9sc3NvbiJ9.knP61KUF1mJmBeIuVgGAIV4busRQh5RTuCfgaB-1CIo'
   })
 
 describe('transport', () => {
@@ -26,33 +26,31 @@ describe('transport', () => {
 
   it('should handle out- and in-streams', (done) => {
 
-    client.subscribe('event-name', (event) => {
-      assert.equal(JSON.stringify(event), '{"some":"payload"}')
-      client.emit('another-event', 'event-data')
-    })
-
     client.transport((createClient) => {
 
       createClient((instream, outstream) => {
 
         outstream.read((data) => {
           data = JSON.parse(data)
-          assert.equal(data.name, 'another-event')
-          assert.equal(data.payload, 'event-data')
-          assert.equal(data.action, 'emit')
+          assert.equal(data.name, 'event-name')
+          assert.equal(data.action, 'subscribe')
           assert.equal(data.type, 'event')
-          done()
-        })
 
-        instream.write({
-          id: 'id',
-          name: 'event-name',
-          type: 'event',
-          action: 'emit',
-          payload: {
-            some: 'payload'
-          }
+          instream.write({
+            id: data.id,
+            name: 'event-name',
+            type: 'event',
+            action: 'emit',
+            payload: {
+              some: 'payload'
+            }
+          })
         })
+      })
+
+      client.subscribe('event-name', (event) => {
+        assert.equal(JSON.stringify(event.data), '{"some":"payload"}')
+        done()
       })
     })
   })

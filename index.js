@@ -1,21 +1,25 @@
 'use strict'
 
 const Objectstream = require('objectstreamer')
-const Queue = require('queue')
+const validator = require('argument-validator')
+const jwt = require('jsonwebtoken')
+const Queue = require('ssfq')
 const axios = require('axios')
 
 class Client {
 
-  constructor(options) {
+  constructor(options = {}) {
+    validator.objectOrEmpty(options, 'options')
 
     this._options = Object.assign({
       host: 'localhost',
-      port: 8080
+      port: 5353
     }, options)
 
     this._queue = new Queue()
     this._queue.pause()
 
+    this.user = null
     this.outstream = new Objectstream()
     this.instream = new Objectstream()
     this.refinedstream = this.instream
@@ -24,6 +28,7 @@ class Client {
   }
 
   login(credentials) {
+    validator.object(credentials, 'credentials')
 
     const options = this._options
 
@@ -32,29 +37,32 @@ class Client {
 
         if (!res.data.token) return console.error('No token received');
 
+        this.user = jwt.decode(res.data.token)
         this._token = res.data.token
-        this._queue.resume()
+
+        setTimeout(() => {
+          this._queue.resume()
+        })
+
+        return this.user
       })
       .catch(console.log)
 
-    return this
   }
 
   transport(handleTransport) {
+    validator.function(handleTransport, 'handleTransport')
 
-    this._queue.push((next) => {
+    handleTransport((clientConstuctor) => {
+      validator.function(clientConstuctor, 'clientConstuctor')
 
-      handleTransport((clientConstuctor) => {
-        clientConstuctor(this.instream, this.outstream
-          .map((data) => Object.assign({}, data, {
-            token: this._token
-          }))
-          .map(data => {
-            return JSON.stringify(data)
-          }))
-      })
-
-      next()
+      clientConstuctor(this.instream, this.outstream
+        .map((data) => Object.assign({}, data, {
+          token: this._token
+        }))
+        .map(data => {
+          return JSON.stringify(data)
+        }))
     })
 
     return this
