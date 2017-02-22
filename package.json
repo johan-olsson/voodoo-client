@@ -1,6 +1,6 @@
 {
   "name": "voodoo-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Think of it as a voodoo doll with a hair from the voodoo-server",
   "main": "index.js",
   "scripts": {

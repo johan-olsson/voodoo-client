@@ -35,7 +35,7 @@ class Client {
     return axios.post(`http://${options.host}:${options.port}/login`, credentials)
       .then(res => {
 
-        if (!res.data.token) return console.error('No token received');
+        if (!res.data.token) return Promise.reject('No token received');
 
         this.user = jwt.decode(res.data.token)
         this._token = res.data.token
@@ -46,7 +46,15 @@ class Client {
 
         return this.user
       })
-      .catch(console.log)
+      .catch(err => {
+        console.log('Retrying')
+
+        setTimeout(() => {
+          this.login(credentials)
+        }, 1000)
+
+        return Promise.reject(err);
+      })
 
   }
 

@@ -8,8 +8,15 @@ describe('login', () => {
 
   it('should emit error if no token is received', (done) => {
 
+    process.stdout.on('data', console.log.bind(this, 'stderr'))
+    process.stderr.on('data', console.log.bind(this, 'stderr'))
+
     var scope = nock('http://localhost:5353')
-      .post('/login')
+      .post('/login', {
+        user: 'user',
+        password: 'password'
+      })
+      .times(2)
       .reply(200, {})
 
     const client = new Client()
@@ -17,16 +24,11 @@ describe('login', () => {
       user: 'user',
       password: 'password'
     })
-    .then((err) => {
-      console.log('then', err)
-      assert.equal(err, 'No token received')
-      done()
-    })
     .catch((err) => {
-      console.log('catch', err)
-      // assert.equal(err, 'No token received')
+      assert.equal(err, 'No token received')
       done()
     })
 
   })
+
 })
