@@ -21,7 +21,7 @@ Done. But now you have to add a transport to be able to do anything else then lo
 There are few included transport plugins:
 #### tcp
 
-The tcp transport takes the same arguments as [net.connect](https://nodejs.org/api/net.html#net_net_connect_options_connectlistener)
+The tcp transport takes the same arguments as [net.connect](https://nodejs.org/api/net.html#net_net_connectoptions_connectlistener)
 
 ```javascript
 const tcptransport = require('voodoo-server/plugins/tcp-transport')
@@ -55,13 +55,13 @@ client.login({
 
 ```
 
-## client.provide(name, [handler])
+## client.define(name, [handler])
 
 The send command can be sent as many times as you like until you choose to end the subject.
 
 ```javascript
 
-client.provide('say-hello', (req, res) => {
+client.define('say-hello', (req, res) => {
 
   for (let i = 0; i <= req.data.times || 1; i += 1)
     res.send(`Hello ${req.user.name}!!!`)
@@ -75,10 +75,10 @@ client.provide('say-hello', (req, res) => {
 * **res.error({error})** _send the given error_
 * **res.end({message})** _send the given message(optional) and end the rpc stream_
 
-## client.make(name, {payload}, [callback])
+## client.run(name, {data}, [callback])
 ```javascript
 
-client.make('say-hello', {
+client.run('say-hello', {
   times: 3
 }, (data) => {
   console.log(data) // Hello Johan Olsson!!!
@@ -97,7 +97,7 @@ client.subscribe('say', (event) => {
 
 ```
 
-## client.emit(name, {payload})
+## client.emit(name, {data})
 ```javascript
 
 client.emit('say', {

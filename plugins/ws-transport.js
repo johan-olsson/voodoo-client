@@ -1,6 +1,7 @@
 'use strict'
 
-var engineClient = require('engine.io-client')
+const engineClient = require('engine.io-client')
+const Rx = require('rxjs')
 
 module.exports = (url) => {
 
@@ -8,13 +9,17 @@ module.exports = (url) => {
 
   return (createClient) => {
 
-    createClient((writeStream, readStream) => {
+    console.log('Connecting to WebSocket transport...')
+
+    createClient((instream, outstream) => {
+
+      console.log('Connected to WebSocket transport!')
 
       socket.on('message', (data) => {
-        writeStream.write(data)
+        instream.next(data)
       })
 
-      readStream.read((data) => {
+      outstream.subscribe((data) => {
         socket.send(data)
       })
     })

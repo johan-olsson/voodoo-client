@@ -1,36 +1,38 @@
 'use strict'
 
-const Objectstream = require('objectstreamer')
+const Request = require('./lib/Request')
 const validator = require('argument-validator')
 const jwt = require('jsonwebtoken')
 const Queue = require('ssfq')
 const axios = require('axios')
+const EventEmitter = require('events')
+const merge = require('./lib/merge')
+const Rx = require('rxjs')
 
 class Client {
 
   constructor(options = {}) {
     validator.objectOrEmpty(options, 'options')
 
-    this._options = Object.assign({
+    this.options = Object.assign({
       host: 'localhost',
       port: 5353
     }, options)
 
-    this._queue = new Queue()
-    this._queue.pause()
+    this.queue = new Queue()
+    this.queue.pause()
 
     this.user = null
-    this.outstream = new Objectstream()
-    this.instream = new Objectstream()
-    this.refinedstream = this.instream
-      .map((data) => (data instanceof Buffer) ? data.toString() : data)
-      .map((data) => (typeof data === 'string') ? JSON.parse(data) : data)
+    this.token = null
+
+    this.outstream = new Rx.Subject()
+    this.instream = new Rx.Subject()
   }
 
   login(credentials) {
     validator.object(credentials, 'credentials')
 
-    const options = this._options
+    const options = this.options
 
     return axios.post(`http://${options.host}:${options.port}/login`, credentials)
       .then(res => {
@@ -38,18 +40,20 @@ class Client {
         if (!res.data.token) return Promise.reject('No token received');
 
         this.user = jwt.decode(res.data.token)
-        this._token = res.data.token
+        this.token = res.data.token
 
         setTimeout(() => {
-          this._queue.resume()
+          console.log('Authentication successful!')
+          this.queue.resume()
         })
 
         return this.user
       })
       .catch(err => {
-        console.log('Retrying')
+        console.log('Authentication request failed!')
 
         setTimeout(() => {
+          console.log('Retrying...')
           this.login(credentials)
         }, 1000)
 
@@ -58,19 +62,28 @@ class Client {
 
   }
 
-  transport(handleTransport) {
-    validator.function(handleTransport, 'handleTransport')
+  transport(transportHandler) {
+    validator.function(transportHandler, 'transportHandler')
 
-    handleTransport((clientConstuctor) => {
-      validator.function(clientConstuctor, 'clientConstuctor')
+    transportHandler((constuctor) => {
+      validator.function(constuctor, 'constuctor')
 
-      clientConstuctor(this.instream, this.outstream
-        .map((data) => Object.assign({}, data, {
-          token: this._token
+      const instream = new Rx.Subject()
+      const outstream = this.outstream.map(data => {
+        return JSON.stringify(merge(data, {
+          token: this.token
         }))
-        .map(data => {
-          return JSON.stringify(data)
-        }))
+      })
+
+      instream
+        .map(data => (data instanceof Buffer) ? data.toString() : data)
+        .map(data => (typeof data === 'string') ? JSON.parse(data) : data)
+        .map(data => new Request(data))
+        .subscribe(data => {
+          this.instream.next(data)
+        })
+
+      constuctor(instream, outstream)
     })
 
     return this
@@ -79,8 +92,8 @@ class Client {
 
 Client.prototype.emit = require('./src/emit')
 Client.prototype.subscribe = require('./src/subscribe')
-Client.prototype.make = require('./src/make')
-Client.prototype.provide = require('./src/provide')
+Client.prototype.run = require('./src/run')
+Client.prototype.define = require('./src/define')
 Client.prototype.permission = require('./src/permission')
 Client.prototype.validate = require('./src/validate')
 

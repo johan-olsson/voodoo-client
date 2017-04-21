@@ -4,28 +4,28 @@ const validator = require('argument-validator')
 const Objectstreamer = require('objectstreamer')
 const uuid = require('uuid').v4
 
-module.exports = function (name, payload, handler) {
+module.exports = function(name, data, handler) {
   validator.string(name, 'name')
-  validator.isType('undefined', payload)
+  validator.isType('unsubscribed', data)
   validator.function(handler, 'handler')
 
   const id = uuid()
 
-  this._queue.push((next) => {
+  this.queue.push((next) => {
 
-    this.refinedstream.filter((data) => {
+    this.instream.filter((data) => {
         return data.id === id
       })
-      .read((data) => {
-        if (handler) handler(data.payload)
+      .subscribe((data) => {
+        if (handler) handler(data.data)
       })
 
-    this.outstream.write({
+    this.outstream.next({
       id: id,
       name: name,
-      action: 'make',
+      action: 'run',
       type: 'rpc',
-      payload: payload
+      data: data
     })
 
     next()

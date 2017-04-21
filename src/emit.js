@@ -4,20 +4,20 @@ const validator = require('argument-validator')
 const Objectstreamer = require('objectstreamer')
 const uuid = require('uuid').v4
 
-module.exports = function (name, payload) {
+module.exports = function(name, data) {
   validator.string(name, 'name')
-  validator.isType('undefined', payload)
+  validator.isType('unsubscribed', data)
 
   const id = uuid()
 
-  this._queue.push((next) => {
+  this.queue.push((next) => {
 
-    this.outstream.write({
+    this.outstream.next({
       id: id,
       name: name,
       action: 'emit',
       type: 'event',
-      payload: payload
+      data: data
     })
 
     next()

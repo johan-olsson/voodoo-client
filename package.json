@@ -1,6 +1,6 @@
 {
   "name": "voodoo-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Think of it as a voodoo doll with a hair from the voodoo-server",
   "main": "index.js",
   "scripts": {
@@ -8,8 +8,8 @@
     "test:watch": "mocha --watch test",
     "coverage": "nyc --reporter=html --reporter=text npm test; echo coverage/index.html"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Johan Olsson",
+  "license": "MIT",
   "dependencies": {
     "argument-validator": "^0.1.0",
     "axios": "^0.15.3",
@@ -23,6 +23,7 @@
   "devDependencies": {
     "mocha": "^3.2.0",
     "nock": "^9.0.2",
-    "nyc": "^10.1.2"
+    "nyc": "^10.1.2",
+    "voodoo-server": "0.0.3"
   }
 }

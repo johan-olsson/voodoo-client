@@ -2,6 +2,7 @@
 
 const validator = require('argument-validator')
 const Objectstreamer = require('objectstreamer')
+const Response = require('../lib/Response')
 const uuid = require('uuid').v4
 
 module.exports = function(name, handler) {
@@ -12,19 +13,25 @@ module.exports = function(name, handler) {
 
   this.queue.push((next) => {
 
-    this.instream.filter((req) => req.match({
-        type: 'event',
-        action: 'emit',
-        name,
-        id
+    this.instream.filter(req => req.match({
+        type: 'rpc',
+        action: 'run',
+        name
       }))
-      .subscribe(handler)
+      .subscribe((req) => {
+
+        const res = new Response(this, req)
+
+        Promise.resolve()
+          .then(() => handler(req, res))
+          .catch(res.error)
+      })
 
     this.outstream.next({
       id: id,
       name: name,
-      action: 'subscribe',
-      type: 'event'
+      action: 'define',
+      type: 'rpc'
     })
 
     next()
